@@ -1,7 +1,11 @@
 use near_rng::Rng;
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
-use near_sdk::{env, log, near_bindgen};
+use near_sdk::{env, near_bindgen};
 use std::cmp::Ordering;
+
+#[near_bindgen]
+#[derive(BorshDeserialize, BorshSerialize)]
+pub struct Msg(String);
 
 #[near_bindgen]
 #[derive(BorshDeserialize, BorshSerialize)]
@@ -21,11 +25,11 @@ impl Contract {
         let value = rng.rand_range_u64(0, 100);
         self.guess = value;
     }
-    pub fn get_user_guess(&mut self, number: u64) {
+    pub fn get_user_guess(&mut self, number: u64) -> Result<Msg, ()> {
         match self.guess.cmp(&number) {
-            Ordering::Less => log!("Too small"),
-            Ordering::Greater => log!("Too big"),
-            Ordering::Equal => log!("You win"),
+            Ordering::Less => Ok(Msg("Too small".to_string())),
+            Ordering::Greater => Ok(Msg("Too big".to_string())),
+            Ordering::Equal => Ok(Msg("You win".to_string())),
         }
     }
     // ADD CONTRACT METHODS HERE
@@ -61,5 +65,15 @@ mod tests {
         contract.random_number();
         assert!(contract.guess > 0);
         assert!(contract.guess < 100);
+    }
+    #[test]
+    fn test_get_user_guess() {
+        let accountid = AccountId::new_unchecked("onchez.test".to_string());
+        let context = get_context(accountid);
+        testing_env!(context);
+
+        let mut contract = Contract::default();
+        contract.random_number();
+        let result = contract.get_user_guess(contract.guess);
     }
 }
