@@ -16,11 +16,10 @@ impl Default for Contract {
 
 #[near_bindgen]
 impl Contract {
-    pub fn random_number(&mut self) -> u64 {
+    pub fn random_number(&mut self) {
         let mut rng = Rng::new(&env::random_seed());
         let value = rng.rand_range_u64(0, 100);
         self.guess = value;
-        value
     }
     pub fn get_user_guess(&mut self, number: u64) {
         match self.guess.cmp(&number) {
@@ -59,8 +58,8 @@ mod tests {
         testing_env!(context);
 
         let mut contract = Contract::default();
-        let random_number = contract.random_number();
-        assert!(random_number > 0);
-        assert!(random_number < 100);
+        contract.random_number();
+        assert!(contract.guess > 0);
+        assert!(contract.guess < 100);
     }
 }
