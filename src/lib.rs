@@ -1,10 +1,12 @@
 use near_rng::Rng;
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
+use near_sdk::serde::{Deserialize, Serialize};
 use near_sdk::{env, near_bindgen};
 use std::cmp::Ordering;
 
 #[near_bindgen]
-#[derive(BorshDeserialize, BorshSerialize)]
+#[derive(BorshDeserialize, BorshSerialize, Serialize, Deserialize)]
+#[serde(crate = "near_sdk::serde")]
 pub struct Msg(String);
 
 #[near_bindgen]
@@ -75,5 +77,7 @@ mod tests {
         let mut contract = Contract::default();
         contract.random_number();
         let result = contract.get_user_guess(contract.guess);
+
+        assert_eq!(result.unwrap().0, "You win");
     }
 }
